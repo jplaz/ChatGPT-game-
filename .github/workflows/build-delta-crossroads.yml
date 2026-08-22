@@ -19,6 +19,13 @@ jobs:
       - name: Check out Westeros patch branch
         uses: actions/checkout@v4
 
+      - name: Install native build dependencies
+        shell: bash
+        run: |
+          set -euxo pipefail
+          apt-get update
+          apt-get install -y --no-install-recommends libpng-dev zlib1g-dev pkg-config build-essential ca-certificates
+
       - name: Configure and verify toolchain
         shell: bash
         run: |
@@ -29,6 +36,7 @@ jobs:
           make --version
           git --version
           python3 --version
+          pkg-config --modversion libpng
 
       - name: Clone real Pokemon Crossroads source
         shell: bash
