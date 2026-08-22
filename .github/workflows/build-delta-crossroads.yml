@@ -19,10 +19,12 @@ jobs:
       - name: Check out Westeros patch branch
         uses: actions/checkout@v4
 
-      - name: Verify toolchain
+      - name: Configure and verify toolchain
         shell: bash
         run: |
           set -euxo pipefail
+          export PATH="$DEVKITARM/bin:$PATH"
+          echo "$DEVKITARM/bin" >> "$GITHUB_PATH"
           arm-none-eabi-gcc --version
           make --version
           git --version
@@ -51,6 +53,7 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
+          export PATH="$DEVKITARM/bin:$PATH"
           cd crossroads
           make modern -j2
 
