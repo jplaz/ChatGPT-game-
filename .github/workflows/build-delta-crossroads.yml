@@ -1,0 +1,75 @@
+name: Build Delta Crossroads ROM
+
+on:
+  push:
+    branches:
+      - delta-emerald-westeros
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: devkitpro/devkitarm:latest
+
+    steps:
+      - name: Check out Westeros patch branch
+        uses: actions/checkout@v4
+
+      - name: Verify toolchain
+        shell: bash
+        run: |
+          set -euxo pipefail
+          arm-none-eabi-gcc --version
+          make --version
+          git --version
+          python3 --version
+
+      - name: Clone real Pokemon Crossroads source
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git clone --depth 1 https://github.com/eonlynx/pokecrossroads.git crossroads
+          cd crossroads
+          git submodule update --init --recursive
+
+      - name: Apply Westeros source overlay when present
+        shell: bash
+        run: |
+          set -euxo pipefail
+          if [ -d delta_mods/overlay ]; then
+            cp -a delta_mods/overlay/. crossroads/
+          fi
+          if [ -f delta_mods/apply.py ]; then
+            python3 delta_mods/apply.py crossroads
+          fi
+
+      - name: Compile Crossroads with devkitARM
+        shell: bash
+        run: |
+          set -euxo pipefail
+          cd crossroads
+          make modern -j2
+
+      - name: Collect Delta ROM
+        shell: bash
+        run: |
+          set -euxo pipefail
+          mkdir -p dist
+          ROM=""
+          for candidate in crossroads/poke_crossroads.gba crossroads/pokeemerald.gba crossroads/*.gba; do
+            if [ -f "$candidate" ]; then
+              ROM="$candidate"
+              break
+            fi
+          done
+          test -n "$ROM"
+          cp "$ROM" "dist/A-Song-of-Ice-and-Monsters-Crossroads.gba"
+          ls -lh dist/A-Song-of-Ice-and-Monsters-Crossroads.gba
+
+      - name: Upload Delta ROM
+        uses: actions/upload-artifact@v4
+        with:
+          name: A-Song-of-Ice-and-Monsters-Delta-ROM
+          path: dist/A-Song-of-Ice-and-Monsters-Crossroads.gba
+          if-no-files-found: error
