@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="theme-color" content="#f7f2ea">
+<title>Postpartum+ v1.4 Test</title>
+<style>
+html,body{margin:0;min-height:100%;background:#f7f2ea;color:#16372e;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.boot{min-height:100vh;display:grid;place-items:center;padding:24px;text-align:center}.mark{width:64px;height:64px;border-radius:22px;margin:0 auto;display:grid;place-items:center;background:#16372e;color:#fff;font:800 28px Georgia,serif;box-shadow:0 16px 40px rgba(22,55,46,.16)}.boot h1{font-size:28px;margin:16px 0 7px;letter-spacing:-.04em}.boot p{color:#69736e;margin:0;font-size:15px}.err{max-width:520px;color:#9c2f2f}.pulse{animation:pulse 1.4s ease-in-out infinite}@keyframes pulse{50%{transform:scale(.97);opacity:.78}}
+</style>
+</head>
+<body>
+<div class="boot"><div><div class="mark pulse">P+</div><h1>Loading Postpartum+…</h1><p>v1.4 test · production untouched</p></div></div>
+<script>
+(async()=>{
+ try{
+  const base='https://raw.githubusercontent.com/jplaz/ChatGPT-game-/pplus-v14-preview/_pplus/v14/';
+  const names=Array.from({length:11},(_,i)=>`c${String(i).padStart(2,'0')}.b64`);
+  const parts=await Promise.all(names.map(async n=>{
+   const r=await fetch(base+n,{cache:'no-store'});
+   if(!r.ok) throw new Error(`${n} returned ${r.status}`);
+   return (await r.text()).trim();
+  }));
+  const b=parts.join('');
+  const x=atob(b),u=new Uint8Array(x.length);
+  for(let i=0;i<x.length;i++)u[i]=x.charCodeAt(i);
+  if(!('DecompressionStream' in window)) throw new Error('This browser cannot unpack the preview.');
+  const ds=new DecompressionStream('gzip');
+  const html=await new Response(new Blob([u]).stream().pipeThrough(ds)).text();
+  document.open();document.write(html);document.close();
+ }catch(e){
+  document.body.innerHTML='<div class="boot"><div class="err"><div class="mark">P+</div><h1>Preview could not open</h1><p>'+String(e.message||e)+'</p></div></div>';
+ }
+})();
+</script>
+</body>
+</html>
